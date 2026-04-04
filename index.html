@@ -1,27 +1,1835 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-		/>
 
-		<title>reveal.js</title>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<link rel="stylesheet" href="dist/reset.css" />
-		<link rel="stylesheet" href="dist/reveal.css" />
-		<link rel="stylesheet" href="dist/theme/black.css" />
+	<title>reveal.js</title>
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
+	<link rel="stylesheet" href="dist/reset.css" />
+	<link rel="stylesheet" href="dist/reveal.css" />
+	<link rel="stylesheet" href="dist/theme/black.css" />
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+	<style>
+		.replace-fragment {
+			opacity: 0;
+			position: absolute;
+			width: 100%;
+			transition: opacity 0.5s ease;
+		}
+
+		.replace-fragment.visible {
+			opacity: 1;
+		}
+
+		.content-box {
+			position: relative;
+			background: linear-gradient(135deg,
+					rgba(15, 23, 42, 0.85),
+					rgba(2, 6, 23, 0.75));
+
+			backdrop-filter: blur(18px) saturate(140%);
+			-webkit-backdrop-filter: blur(18px) saturate(140%);
+
+			border-radius: 24px;
+			padding: 50px;
+
+			border: 1px solid rgba(148, 163, 184, 0.15);
+
+			box-shadow:
+				0 25px 60px rgba(0, 0, 0, 0.7),
+				/* depth */
+				inset 0 1px 0 rgba(255, 255, 255, 0.05),
+				/* subtle inner highlight */
+				0 0 40px rgba(56, 189, 248, 0.12);
+			/* glow */
+
+			transition: all 0.4s ease;
+		}
+
+		.content-box::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			border-radius: 24px;
+			padding: 1px;
+
+			background: linear-gradient(120deg,
+					rgba(56, 189, 248, 0.6),
+					rgba(168, 85, 247, 0.4),
+					rgba(56, 189, 248, 0.6));
+
+			-webkit-mask:
+				linear-gradient(#000 0 0) content-box,
+				linear-gradient(#000 0 0);
+			-webkit-mask-composite: xor;
+			mask-composite: exclude;
+
+			opacity: 0.4;
+			pointer-events: none;
+		}
+
+		.content-box:hover {
+			transform: translateY(-6px) scale(1.01);
+
+			box-shadow:
+				0 35px 80px rgba(0, 0, 0, 0.85),
+				inset 0 1px 0 rgba(255, 255, 255, 0.08),
+				0 0 60px rgba(56, 189, 248, 0.18);
+		}
+
+		.content-box::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 40%;
+
+			background: linear-gradient(to bottom,
+					rgba(255, 255, 255, 0.06),
+					transparent);
+
+			border-radius: 24px 24px 0 0;
+			pointer-events: none;
+		}
+
+		@keyframes wasmLogoFloat {
+			0%, 100% {
+				transform: translateY(0px) rotate(0deg);
+			}
+			50% {
+				transform: translateY(-15px) rotate(5deg);
+			}
+		}
+
+		@keyframes wasmLogoGlow {
+			0%, 100% {
+				filter: drop-shadow(0 0 20px rgba(124,58,237,0.5)) drop-shadow(0 0 10px rgba(56,189,248,0.3));
+			}
+			50% {
+				filter: drop-shadow(0 0 30px rgba(124,58,237,0.8)) drop-shadow(0 0 15px rgba(56,189,248,0.5));
+			}
+		}
+
+		@keyframes wasmLogoEntry {
+			0% {
+				opacity: 0;
+				transform: scale(0.3) rotateZ(-15deg);
+			}
+			50% {
+				opacity: 1;
+				transform: scale(1.05) rotateZ(5deg);
+			}
+			100% {
+				opacity: 1;
+				transform: scale(1) rotateZ(0deg);
+			}
+		}
+
+		.wasm-logo-animate {
+			animation: wasmLogoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both, wasmLogoFloat 4s ease-in-out 1.1s infinite, wasmLogoGlow 3s ease-in-out 1.1s infinite;
+			transition: transform 0.3s ease;
+		}
+
+		.wasm-logo-animate:hover {
+			animation-play-state: paused;
+			filter: drop-shadow(0 0 40px rgba(0,245,255,0.7)) !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+
+			<!-- slide 1: Cinematic Cover Slide -->
+			<section data-background-gradient="linear-gradient(135deg, #0f172a, #020617)"
+				style="position:relative; overflow:hidden;">
+
+				<!-- Animated Particle Canvas -->
+				<canvas id="particles-canvas" style="
+    position:absolute; 
+    top:0; left:0; width:100%; height:100%; 
+    z-index:0;
+  "></canvas>
+
+				<div
+					style="position:relative; display:flex; flex-direction:column; justify-content:space-between; height:100%; z-index:1;">
+
+					<!-- Center Content -->
+					<div
+						style="text-align:center; margin-top:100px; backdrop-filter: blur(6px); padding: 50px; border-radius: 25px;">
+
+						<h1 style="
+        font-size:90px; 
+        letter-spacing:3px; 
+        color:#00f5ff; 
+        text-shadow: 
+          0 0 20px rgba(0,245,255,0.7), 
+          0 0 40px rgba(0,245,255,0.5),
+          0 0 60px rgba(0,245,255,0.3);
+        margin:0;
+        line-height:1.1;
+        font-family: 'Poppins', sans-serif;">
+							WEBASSEMBLY
+						</h1>
+
+						<p style="
+        font-size:28px; 
+        color:#94a3b8; 
+        margin-top:20px; 
+        text-shadow: 0 0 5px rgba(255,255,255,0.1); 
+        font-family: 'Poppins', sans-serif;">
+							High-performance code for the web
+						</p>
+
+						<div style="
+        margin: 30px auto 0; 
+        width:80px; 
+        height:4px; 
+        background: linear-gradient(90deg, #00f5ff, #3b82f6, #0ea5e9); 
+        border-radius:2px; 
+        animation: glowBar 2s ease-in-out infinite alternate;">
+						</div>
+					</div>
+
+					<!-- Footer -->
+					<div
+						style="text-align:center; margin-bottom:40px; font-family: 'Poppins', sans-serif;">
+						<p style="margin:0; font-size:24px; font-weight:700; color:#00f5ff; letter-spacing:1px; text-shadow: 0 0 20px rgba(0,245,255,0.4);">Somsubhra Mukherjee</p>
+						<p style="margin:8px 0 0 0; font-size:20px; color:#38bdf8; font-weight:600; letter-spacing:2px; text-shadow: 0 0 15px rgba(56,189,248,0.3);">25MF10063</p>
+					</div>
+
+				</div>
+			</section>
+
+			<style>
+				/* Glow Bar Animation */
+				@keyframes glowBar {
+					0% {
+						box-shadow: 0 0 10px #00f5ff;
+					}
+
+					50% {
+						box-shadow: 0 0 20px #3b82f6;
+					}
+
+					100% {
+						box-shadow: 0 0 30px #0ea5e9;
+					}
+				}
+			</style>
+
+			<script>
+				// Particle Animation
+				const canvas = document.getElementById('particles-canvas');
+				const ctx = canvas.getContext('2d');
+				let particlesArray = [];
+
+				function resizeCanvas() {
+					canvas.width = window.innerWidth;
+					canvas.height = window.innerHeight;
+				}
+				window.addEventListener('resize', resizeCanvas);
+				resizeCanvas();
+
+				class Particle {
+					constructor() {
+						this.x = Math.random() * canvas.width;
+						this.y = Math.random() * canvas.height;
+						this.size = Math.random() * 3 + 1;
+						this.speedX = Math.random() * 0.5 - 0.25;
+						this.speedY = Math.random() * 0.5 - 0.25;
+						this.opacity = Math.random() * 0.5 + 0.2;
+					}
+					update() {
+						this.x += this.speedX;
+						this.y += this.speedY;
+
+						if (this.x > canvas.width) this.x = 0;
+						if (this.x < 0) this.x = canvas.width;
+						if (this.y > canvas.height) this.y = 0;
+						if (this.y < 0) this.y = canvas.height;
+					}
+					draw() {
+						ctx.fillStyle = `rgba(0,245,255,${this.opacity})`;
+						ctx.beginPath();
+						ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+						ctx.fill();
+					}
+				}
+
+				function initParticles() {
+					particlesArray = [];
+					const number = Math.floor((canvas.width * canvas.height) / 20000); // density
+					for (let i = 0; i < number; i++) {
+						particlesArray.push(new Particle());
+					}
+				}
+
+				function animateParticles() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					particlesArray.forEach(p => { p.update(); p.draw(); });
+					requestAnimationFrame(animateParticles);
+				}
+
+				initParticles();
+				animateParticles();
+			</script>
+
+			
+
+			<!-- slide 2 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<div style="display:flex; align-items:center; justify-content:space-between; gap:40px;">
+
+						<!-- LEFT: Text -->
+						<div style="width:60%; text-align:left;">
+							<h2 style="font-size:48px; margin-bottom:20px;">
+								What is WebAssembly?
+							</h2>
+
+							<p class="fragment" style="font-size:24px; margin:10px 0;">
+								👉 A <strong>low-level binary format</strong> for the web
+							</p>
+
+							<p class="fragment" style="font-size:24px; margin:10px 0;">
+								👉 Runs at <strong>near-native speed</strong>
+							</p>
+
+							<p class="fragment" style="font-size:24px; margin:10px 0;">
+								👉 Compile <strong>C / C++ / Rust → WASM</strong>
+							</p>
+
+							<p class="fragment" style="font-size:20px; color:#94a3b8; margin-top:20px;">
+								💡 Not meant to be written by hand
+							</p>
+						</div>
+
+						<!-- RIGHT: Image -->
+						<div style="width:40%; text-align:center;">
+						<img src="WebAssembly_Logo.svg" class="wasm-logo-animate"
+							style="width:70%; opacity:0.9;">
+					</div>
+				</div>
+			</section>
+
+			<!-- slide 3 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+
+					<h2 style="font-size:48px; margin-bottom:40px;">
+						The motivation behind Web assembly
+					</h2>
+
+					<div style="text-align:left; max-width:900px; margin:auto;">
+
+						<p class="fragment fade-up" style="font-size:26px;">
+							👉 <strong>Near-Native Performance:- </strong>
+							WebAssembly enables high-performance execution in the browser, making compute-heavy
+							applications
+							like games, CAD tools, and video editors feasible on the web.
+
+						</p>
+
+						<p class="fragment fade-up" style="font-size:26px;">
+							👉 <strong>Multi-Language Support:- </strong>
+							It allows code written in languages like C, C++, and Rust to run directly in the browser,
+							avoiding the need to rewrite everything in JavaScript.
+						</p>
+
+						<p class="fragment fade-up" style="font-size:26px;">
+							👉 <strong>Secure & Portable Execution:- </strong>
+							WASM runs in a sandboxed environment with a compact binary format, ensuring fast, secure,
+							and
+							cross-browser compatibility.
+						</p>
+
+						<p class="fragment fade-up" style="font-size:26px;">
+							👉 <strong>Complementary to JavaScript:- </strong>
+							It complements JavaScript by handling performance-critical tasks, while JavaScript manages
+							UI
+							and application logic.
+						</p>
+
+						<p class="fragment fade-up" style="font-size:30px; margin-top:30px; color:#38bdf8;">
+							Best Solution: WebAssembly + JavaScript
+						</p>
+
+					</div>
+				</div>
+
+			</section>
+
+			<!-- slide 4 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box" style="padding: 30px;">
+					<h2 style="font-size:42px; margin-bottom:20px;">
+						How WebAssembly Fits into the Web
+					</h2>
+
+					<div style="display:flex; justify-content:space-between; gap:30px;">
+
+						<!-- LEFT -->
+						<div style="width:48%; text-align:left;">
+							<h3 style="color:#38bdf8; font-size:22px; margin-bottom:10px;">🔒 WASM Virtual Machine</h3>
+
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 Runs inside a <strong>sandboxed VM</strong></p>
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 No access to <strong>OS / File System / Network</strong></p>
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 Uses only <strong>its own memory</strong></p>
+							<!-- <p class="fragment fade-up">👉 <strong>Secure & deterministic</strong></p> -->
+						</div>
+
+						<!-- RIGHT -->
+						<div style="width:48%; text-align:left;">
+							<h3 style="color:#f472b6; font-size:22px; margin-bottom:10px;">🔗 Interaction Layer</h3>
+
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 Talks via <strong>JavaScript</strong></p>
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 Uses <strong>Web APIs</strong> (DOM, WebGL, Fetch)</p>
+							<p class="fragment fade-up" style="font-size:18px; margin:8px 0;">👉 Access is <strong>controlled</strong></p>
+						</div>
+
+					</div>
+
+					<!-- FLOWCHART -->
+					<div style="margin-top:30px; text-align:center; font-size:22px;">
+						<p class="fragment zoom-in">
+							WASM Module ➝ WASM VM ➝ Browser ➝ Your System
+						</p>
+					</div>
+				</div>
+
+			</section>
+
+			<!-- slide 5 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<!-- SLIDE 1: MODULE -->
+				<section>
+					<div class="content-box">
+						<h2>Key Concepts</h2>
+						<h3 style="color:#38bdf8;">Module</h3>
+						<p style="font-size:24px;">
+							<!-- Compiled WASM binary → executable machine code<br>
+						Declares <strong>imports & exports</strong> -->
+							Web Assembly binary that has been compiled by the browser into executable machine code. A
+							method
+							is stateless and can be explicitly shared between windows, and workers. A module declares
+							imports and exports just like an ES module.
+
+						</p>
+					</div>
+				</section>
+
+				<!-- SLIDE 2: MEMORY -->
+				<section>
+					<div class="content-box">
+						<!-- <h2>Key Concepts</h2> -->
+						<h3 style="color:#f472b6;">Memory</h3>
+						<p style="font-size:24px;">
+							<!-- Resizable <strong>ArrayBuffer</strong><br>
+						Stores raw bytes -->
+							A resizable Array Buffer that contains the linear array of bytes read and written by
+							WebAssembly’s low-level memory access instructions.
+
+						</p>
+					</div>
+				</section>
+
+				<!-- SLIDE 3: TABLE -->
+				<section>
+					<div class="content-box">
+
+						<!-- <h2>Key Concepts</h2> -->
+						<h3 style="color:#22c55e;">Table</h3>
+						<p style="font-size:24px;">
+							<!-- Stores <strong>function references</strong><br>
+						Not possible in raw memory -->
+							A resizable typed array of references (e.g. to functions) that could not otherwise be stored
+							as
+							raw bytes in memory.
+
+						</p>
+					</div>
+
+				</section>
+
+				<!-- SLIDE 4: INSTANCE -->
+				<section>
+					<div class="content-box">
+						<!-- <h2>Key Concepts</h2> -->
+						<h3 style="color:#facc15;">Instance</h3>
+						<p style="font-size:24px;">
+							<!-- Module + <strong>runtime state</strong><br>
+						(Memory, Table, Imports) -->
+							A module paired with all the state it uses at runtime including a Memory, Table and set of
+							imported tables.
+						</p>
+					</div>
+				</section>
+
+			</section>
+
+			<!-- slide 6 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<h2 style="font-size:42px; margin-bottom:25px;">
+					How to Use WebAssembly?
+				</h2>
+
+				<div
+					style="max-width:1100px; margin:auto; display:flex; flex-direction:column; gap:18px; align-items:center;">
+
+					<!-- 1 -->
+					<div class="fragment fade-up content-box" style="width:65%; padding:22px 28px;">
+						<p style="font-size:22px;">
+							1. Porting C/C++ apps with <strong>Emscripten</strong>
+						</p>
+					</div>
+
+					<!-- 2 -->
+					<div class="fragment fade-up content-box" style="width:65%; padding:22px 28px;">
+						<p style="font-size:22px;">
+							2. Writing / generating <strong>WASM at binary level</strong>
+						</p>
+					</div>
+
+					<!-- 3 -->
+					<div class="fragment fade-up content-box" style="width:65%; padding:22px 28px;">
+						<p style="font-size:22px;">
+							3. Building apps in <strong>Rust</strong> targeting WASM
+						</p>
+					</div>
+
+					<!-- 4 -->
+					<div class="fragment fade-up content-box" style="width:65%; padding:22px 28px;">
+						<p style="font-size:22px;">
+							4. Using <strong>AssemblyScript</strong> (TypeScript-like → WASM)
+						</p>
+					</div>
+
+				</div>
+
+			</section>
+
+			<!-- slide 7 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<h2 style="font-size:44px; margin-bottom:20px;">
+					Porting from C/C++
+				</h2>
+
+				<!-- PIPELINE (MAIN VISUAL) -->
+				<div class="fragment fade-in" style="text-align:center; font-size:24px; margin-bottom:30px;">
+					<span style="padding:10px 20px; background:#1e293b; border-radius:10px;">C/C++</span>
+					→
+					<span style="padding:10px 20px; background:#1e293b; border-radius:10px;">Clang + LLVM</span>
+					→
+					<span style="padding:10px 20px; background:#1e293b; border-radius:10px;">WASM</span>
+				</div>
+
+				<!-- CONTENT -->
+				<div style="text-align:left; max-width:900px; margin:auto;">
+
+					<p class="fragment fade-up">
+						👉 Tools like <strong>WasmFiddle / WasmExplorer</strong> are great for beginners
+					</p>
+
+					<p class="fragment fade-up">
+						👉 <strong>Emscripten</strong> = production-grade toolchain
+					</p>
+
+					<p class="fragment fade-up">
+						👉 Generates: <strong>.wasm + JS glue + HTML</strong>
+					</p>
+
+					<p class="fragment fade-up">
+						👉 <strong>JavaScript glue</strong> connects WASM to browser APIs
+					</p>
+
+					<p class="fragment fade-up">
+						👉 Supports libraries: <strong>SDL, OpenGL, POSIX</strong>
+					</p>
+
+					<p class="fragment fade-up">
+						👉 Output: ready-to-run <strong>web application</strong>
+					</p>
+
+					<p class="fragment fade-up" style="margin-top:20px; color:#f87171;">
+						⚠️ WASM cannot directly access Web APIs (yet)
+					</p>
+
+				</div>
+
+			</section>
+
+			<!-- slide 8-->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<h2 style="font-size:42px; margin-bottom:10px;">
+					What Emscripten Generates
+				</h2>
+
+				<p style="font-size:20px; opacity:0.7; margin-bottom:30px;">
+					Compiling C/C++ produces three key files
+				</p>
+
+				<div style="display:flex; justify-content:center; gap:25px; flex-wrap:wrap;">
+
+					<!-- HTML -->
+					<div class="fragment fade-up content-box" style="width:28%; min-width:250px; padding:22px;">
+						<p style="font-size:22px;"><strong>.html</strong></p>
+						<p style="font-size:18px; opacity:0.8;">
+							Entry point<br>
+							Loads everything in browser
+						</p>
+					</div>
+
+					<!-- JS -->
+					<div class="fragment fade-up content-box" style="width:28%; min-width:250px; padding:22px;">
+						<p style="font-size:22px;"><strong>.js</strong></p>
+						<p style="font-size:18px; opacity:0.8;">
+							Glue code<br>
+							Connects WASM ↔ Browser APIs
+						</p>
+					</div>
+
+					<!-- WASM -->
+					<div class="fragment fade-up content-box" style="width:28%; min-width:250px; padding:22px;">
+						<p style="font-size:22px;"><strong>.wasm</strong></p>
+						<p style="font-size:18px; opacity:0.8;">
+							Compiled binary<br>
+							High-performance execution
+						</p>
+					</div>
+
+				</div>
+
+			</section>
+			<!-- slide 9 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<h2 style="font-size:40px; margin-bottom:20px;">
+					JS Glue Code (Bridge)
+				</h2>
+
+				<!-- BIG IDEA -->
+				<p class="fragment fade-in" style="font-size:24px; text-align:center; margin-bottom:25px;">
+					JavaScript connects <strong>WASM</strong> to <strong>Browser APIs</strong>
+				</p>
+
+				<div
+					style="max-width:1100px; margin:auto; display:flex; flex-direction:column; gap:20px; align-items:center;">
+
+					<div class="fragment fade-up content-box" style="width:65%; padding:25px 30px;">
+						<p style="font-size:22px;">
+							1. <strong>Library Mapping</strong><br>
+							OpenGL → WebGL, SDL → Browser Events
+						</p>
+					</div>
+
+					<div class="fragment fade-up content-box" style="width:65%; padding:25px 30px;">
+						<p style="font-size:22px;">
+							2. <strong>WASM Execution</strong><br>
+							fetch() + WebAssembly.instantiate()
+						</p>
+					</div>
+
+					<div class="fragment fade-up content-box" style="width:65%; padding:25px 30px;">
+						<p style="font-size:22px;">
+							3. <strong>Communication</strong><br>
+							Function calls & data transfer
+						</p>
+					</div>
+
+				</div>
+
+			</section>
+			<!-- Slide 10 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2>Using the WebAssembly JS API</h2>
+				<div class="content-box">
+					<p class="fragment">JS controls, WASM provides high performance.</p>
+					<p class="fragment">They work together via the <strong>WASM JS API</strong>.</p>
+					<p class="fragment">Loading a WASM module:</p>
+					<div class="fragment" style="text-align:left; margin:15px auto; max-width:900px;">
+						<p style="font-size:20px; margin:10px 0;"><strong>Old way:</strong> Fetch → Convert → Compile →
+							Instantiate</p>
+						<p style="font-size:20px; margin:10px 0;"><strong>New way (faster):</strong></p>
+						<pre style="font-size:18px;"><code>WebAssembly.instantiateStreaming(
+  fetch("file.wasm"), importObject
+)</code></pre>
+					</div>
+				</div>
+			</section>
+
+			<!-- Slide 11 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2>Import Object</h2>
+				<div class="content-box">
+					<p class="fragment">WASM cannot access JS directly → must pass functions manually.</p>
+					<pre class="fragment"><code>
+const importObject = {
+  my_namespace: {
+    imported_func: (arg) => console.log(arg)
+  }
+};
+    </code></pre>
+					<p class="fragment">JS provides external functionality called by WASM.</p>
+				</div>
+			</section>
+
+			<!-- Slide 12 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2 style="font-size:40px; margin-bottom:20px;">Memory (Linear Memory)</h2>
+				<div class="content-box" style="padding:30px;">
+					<p class="fragment" style="font-size:18px; margin:8px 0;">Continuous block of bytes, like raw RAM.</p>
+					<pre class="fragment" style="font-size:14px; margin:10px 0;"><code>
+const memory = new WebAssembly.Memory({initial: 10, 
+maximum: 100});</code></pre>
+					<p class="fragment" style="font-size:18px; margin:8px 0;">Accessing memory:</p>
+					<pre class="fragment" style="font-size:14px; margin:10px 0;"><code>
+const data = new DataView(memory.buffer);
+data.setUint32(0, 42, true);</code></pre>
+					<p class="fragment" style="font-size:18px; margin:8px 0;">Memory is mutable, growing memory invalidates old buffer:</p>
+					<pre class="fragment" style="font-size:14px; margin:10px 0;"><code>memory.grow(1);</code></pre>
+				</div>
+			</section>
+
+			<!-- Slide 13 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2>Tables (Function Pointers)</h2>
+				<div class="content-box">
+					<p class="fragment">C/C++ uses function pointers → unsafe in raw memory.</p>
+					<p class="fragment">Solution: Tables → safe array of function references.</p>
+					<p class="fragment">Functions stored in table and passed around by <strong>index</strong> instead of
+						pointer.</p>
+				</div>
+			</section>
+
+			<!-- Slide 14 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2>Globals & Multiplicity</h2>
+				<div class="content-box">
+					<p class="fragment"><strong>Globals:</strong> Shared variables between JS and WASM modules.</p>
+					<pre class="fragment"><code>
+const global = new WebAssembly.Global({value: "i32", 
+mutable: true}, 0);
+    </code></pre>
+					<p class="fragment"><strong>Multiplicity:</strong> One module → many instances, one memory →
+						multiple modules for dynamic linking.</p>
+				</div>
+			</section>
+
+			<!-- Slide 15 -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<h2 style="font-size:64px; margin-bottom:30px;">WebAssembly Object & Workflow</h2>
+				<div style="display:flex; gap:30px; justify-content:center; max-width:1200px; margin:auto;">
+					<!-- LEFT COLUMN: WebAssembly Object -->
+					<div style="width:48%; text-align:left;">
+						<p class="fragment" style="font-size:28px; margin-bottom:15px;"><strong
+								style="color:#38bdf8;">JS API:</strong></p>
+						<ol style="font-size:24px; margin:0; line-height:2; padding-left:25px;">
+							<li class="fragment" style="margin:8px 0;"><code>instantiate()</code> → runs WASM</li>
+							<li class="fragment" style="margin:8px 0;"><code>Memory</code> → manage memory</li>
+							<li class="fragment" style="margin:8px 0;"><code>Table</code> → function storage</li>
+							<li class="fragment" style="margin:8px 0;"><code>Global</code> → shared variables</li>
+						</ol>
+					</div>
+					<!-- RIGHT COLUMN: Workflow -->
+					<div style="width:48%; text-align:left;">
+						<p class="fragment" style="font-size:28px; margin-bottom:15px;"><strong
+								style="color:#f472b6;">Workflow:</strong></p>
+						<ol style="font-size:24px; margin:0; line-height:2; padding-left:25px;">
+							<li class="fragment" style="margin:8px 0;">Load <code>.wasm</code> via
+								<code>instantiateStreaming</code>
+							</li>
+							<li class="fragment" style="margin:8px 0;">Provide imports from JS</li>
+							<li class="fragment" style="margin:8px 0;">Execute exported WASM functions</li>
+							<li class="fragment" style="margin:8px 0;">Share memory, functions & variables</li>
+						</ol>
+					</div>
+				</div>
+			</section>
+
+			<!-- Slide 16: Compiling with Navigation -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<!-- SECTION 1: Setup -->
+				<section>
+					<div class="content-box">
+						<h2>Compiling C/C++ to WASM</h2>
+						<h3 style="color:#38bdf8;">Step 1: Setup Emscripten</h3>
+						<p style="font-size:24px;">
+							Install the compiler toolchain to generate WebAssembly from C/C++.
+						</p>
+						<pre style="font-size:18px;"><code>pip install emscripten
+emsdk install latest</code></pre>
+						<p style="font-size:20px; color:#94a3b8; margin-top:15px;">
+							The Emscripten toolchain is essential for converting C/C++ code to WASM.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 2: Prepare Code -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f472b6;">Step 2: Prepare C/C++ Code</h3>
+						<p style="font-size:20px; margin-bottom:15px;">Example C program:</p>
+						<pre style="font-size:16px;"><code>#include &lt;stdio.h&gt;
+int main() {
+  printf("Hello from WASM!\n");
+  return 0;
+}</code></pre>
+						<p style="font-size:20px; color:#94a3b8; margin-top:20px;">
+							Save this as <code>hello.c</code>
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 3: Compile -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#22c55e;">Step 3: Compile with Emscripten</h3>
+						<pre style="font-size:18px;"><code>emcc hello.c -o hello.html</code></pre>
+						<p style="font-size:22px; margin-top:20px; margin-bottom:15px;">
+							<strong>Output files:</strong>
+						</p>
+						<ul style="font-size:20px; line-height:1.8;">
+							<li>✓ <code>hello.wasm</code> – WebAssembly binary</li>
+							<li>✓ <code>hello.js</code> – JavaScript glue code</li>
+							<li>✓ <code>hello.html</code> – Loader page</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4: Run -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;">Step 4: Run in Browser</h3>
+						<p style="font-size:22px; margin-bottom:15px;">
+							<strong>Important:</strong> Use HTTP server, not file:// protocol!
+						</p>
+						<pre style="font-size:18px;"><code>python -m http.server 8000</code></pre>
+						<p style="font-size:20px; margin-top:20px;">
+							Then open <code>http://localhost:8000/hello.html</code> in your browser.
+						</p>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							WASM modules require HTTP for security reasons.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 5: JS Interaction -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f87171;">Step 5: Call C from JS</h3>
+						<pre style="font-size:16px;"><code>// Exported C function
+int add(int a, int b) { return a + b; }
+
+// Call from JavaScript
+Module.ccall('add', 'number', 
+  ['number', 'number'], 
+  [5, 3]
+);</code></pre>
+						<p style="font-size:20px; color:#94a3b8; margin-top:20px;">
+							Use <code>ccall()</code> to invoke C functions from JS.
+						</p>
+					</div>
+				</section>
+
+			</section>
+
+			<!-- Slide 17: WAT Navigation -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<!-- SECTION 1: Modules & S-expressions -->
+				<section>
+					<div class="content-box">
+						<h2>WebAssembly Text Format</h2>
+						<h3 style="color:#38bdf8;">Modules & S-expressions</h3>
+						<p style="font-size:22px; margin-bottom:15px;">
+							Everything is a tree in parentheses. The first label identifies the node type.
+						</p>
+						<pre style="font-size:18px;"><code>(module (memory 1) (func))</code></pre>
+						<p style="font-size:20px; margin-top:20px;">
+							<strong>Structure:</strong> Root is "module", children are "memory" and "func".
+						</p>
+						<p style="font-size:18px; color:#94a3b8; margin-top:15px;">
+							WAT is the human-readable representation of WASM binary modules.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 2: Functions -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f472b6;">Functions</h3>
+						<p style="font-size:20px; margin-bottom:15px;">Core executable units with parameters and return
+							types:</p>
+						<pre style="font-size:16px;"><code>(func (param i32) (param i32) (result f64)
+  (local i32)
+  ;; function body instructions
+)</code></pre>
+						<ul style="font-size:20px; margin-top:20px; line-height:1.8;">
+							<li>✓ Signature declares parameters & return</li>
+							<li>✓ Locals are typed variables</li>
+							<li>✓ Body contains linear instructions</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 3: Types & Stack Machine -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#22c55e;">Types & Stack Machine</h3>
+						<p style="font-size:22px; margin-bottom:15px;"><strong>Numeric Types:</strong></p>
+						<ul style="font-size:20px; line-height:1.8; margin-bottom:20px;">
+							<li>i32 – 32-bit integer</li>
+							<li>i64 – 64-bit integer</li>
+							<li>f32 – 32-bit float</li>
+							<li>f64 – 64-bit float</li>
+						</ul>
+						<p style="font-size:20px; color:#38bdf8;">
+							<strong>Stack Model:</strong> Instructions push and pop values. No direct variable
+							manipulation outside locals.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 4: Memory & Locals -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;">Memory & Locals</h3>
+						<p style="font-size:20px; margin-bottom:15px;"><strong>Locals & Parameters:</strong></p>
+						<pre style="font-size:16px;"><code>(local.get $var)
+(local.set $var)</code></pre>
+						<p style="font-size:20px; margin-top:20px; margin-bottom:15px;">Parameters are treated as
+							initialized locals.</p>
+						<p style="font-size:20px; margin-bottom:15px;"><strong>Linear Memory:</strong></p>
+						<pre style="font-size:16px;"><code>(memory 1)
+(import "js" "mem" (memory 1))</code></pre>
+					</div>
+				</section>
+
+				<!-- SECTION 5: Imports & Exports -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f87171;">Imports & Exports</h3>
+						<p style="font-size:20px; margin-bottom:15px;">Call JS functions or expose WASM functions:</p>
+						<pre style="font-size:16px;"><code>(import "console" "log" (func $log (param i32)))
+(export "sum" (func $sum))</code></pre>
+						<ul style="font-size:20px; margin-top:20px; line-height:1.8;">
+							<li>✓ Import JS functions into WASM</li>
+							<li>✓ Export WASM functions for JS</li>
+							<li>✓ Namespace organization</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 6: Use Cases -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#a78bfa;">Why Use WAT?</h3>
+						<p style="font-size:20px; margin-bottom:20px;">WAT is useful for:</p>
+						<ul style="font-size:22px; line-height:2; margin:0;">
+							<li class="fragment">✓ <strong>Reading</strong> and editing modules</li>
+							<li class="fragment">✓ <strong>Debugging</strong> before converting to binary</li>
+							<li class="fragment">✓ <strong>Understanding</strong> low-level code structure</li>
+							<li class="fragment">✓ <strong>Learning</strong> WebAssembly fundamentals</li>
+						</ul>
+						<p style="font-size:18px; color:#94a3b8; margin-top:30px;">
+							Convert between WAT and binary with <code>wasm2wat</code> and <code>wat2wasm</code> tools.
+						</p>
+					</div>
+				</section>
+
+			</section>
+
+			<!-- Slide 18: Mini WebAssembly Project Walkthrough -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<!-- SECTION 1: Project Overview -->
+				<section>
+					<div class="content-box">
+						<h2>Mini WASM Experiment 1(Unoptimized)</h2>
+						<h3 style="color:#38bdf8;"> Experiment Overview</h3>
+						<ul style="font-size:20px; line-height:1.8; text-align:left;">
+							<li class="fragment">Goal: Compare WASM speed across Safari, Chrome, Firefox</li>
+							<li class="fragment">Implementation: C++ function with heavy computation</li>
+							<li class="fragment">Compiled using Emscripten in unoptimized manner</li>
+							<li class="fragment">Generated: <code>.html, .wasm</code> and <code>.js</code> files</li>
+							<li class="fragment">Modified HTML for testing</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 2: C++ Code -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f472b6;"> C++ Code</h3>
+						<pre style="font-size:16px;"><code>extern "C" {
+
+int heavy(int n) {
+    int sum = 0;
+    for(int i = 0; i < n; i++) {
+        sum += (i % 10);
+    }
+    return sum;
+}
+
+}</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							extern "C" tells the C++ compiler not to mangle the function name, so it can be called from
+							JavaScript or C with a simple, predictable name.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 3: Compilation Command -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#22c55e;"> Compilation Command</h3>
+						<pre style="font-size:16px;"><code>emcc code.cpp -o code.html \
+-s EXPORTED_FUNCTIONS='["_heavy"]' \
+-s EXPORTED_RUNTIME_METHODS='["cwrap"]'</code></pre>
+						<ul style="font-size:20px; margin-top:20px; line-height:1.8;">
+							<li><strong>-o code.html:</strong> Generate HTML + JS + WASM files</li>
+							<li><strong>-s EXPORTED_FUNCTIONS:</strong> Expose C++ function <code>heavy</code> to
+								JavaScript</li>
+							<li><strong>-s EXPORTED_RUNTIME_METHODS:</strong> Expose runtime helpers like
+								<code>cwrap</code> for easy JS calls
+							</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4: Custom HTML Modifications -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#a78bfa;"> Custom HTML Modifications</h3>
+						<!-- <p style="font-size:20px; margin-bottom:20px;">
+							Custom code blocks added to the generated HTML file for testing:
+						</p> -->
+						<p style="font-size:18px; margin-bottom:15px; color:#38bdf8;">
+							<strong>Code Block 1:</strong>
+						</p>
+						<pre style="font-size:14px;"><code>
+<textarea id="output" rows="8"></textarea>
+<div style="margin: 20px;">
+	<button onclick="runJS()">Run JS</button>
+	<button onclick="runWASM()">Run WASM</button>
+</div>
+<p id="result"></p>
+						</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							This code adds a textarea to show output, buttons to run JS or WASM functions, and a
+							paragraph to display the result.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 4a: Custom HTML Second Block -->
+				<section>
+					<div class="content-box">
+						<!-- <h3 style="color:#a78bfa;"> Custom Code Block 2</h3> -->
+						<p style="font-size:18px; margin-bottom:15px; color:#f472b6;">
+							<strong>Code Block 2:</strong>
+						</p>
+						<pre style="font-size:14px;"><code>
+let heavyWASM;
+Module.onRuntimeInitialized = function() {
+
+	heavyWASM = Module.cwrap('heavy', 'number', ['number']);
+
+	console.log("WASM Ready ✅");
+};
+function heavyJS(n) {
+	let sum = 0;
+	for(let i = 0; i < n; i++) {
+  		sum += (i % 10);
+	}
+	return sum;
+}
+
+function runJS() {
+	const N = 5e7;
+    console.time("JS Time");
+    let res = heavyJS(N);
+    console.timeEnd("JS Time");
+    document.getElementById("result").innerText = "JS Result: " + res;
+}
+
+function runWASM() {
+	const N = 5e7;
+    console.time("WASM Time");
+    let res = heavyWASM(N);
+    console.timeEnd("WASM Time");
+    document.getElementById("result").innerText = "WASM Result: " + res;
+}
+						</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							This code defines a JS version and a WASM version of heavy, then runs and times each when
+							the buttons are clicked, displaying the results.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION: Running Local Server -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Running Local Server</h3>
+						<p style="font-size:18px; color:#94a3b8; margin-top:10px;">
+							Browsers block loading <code>.wasm</code> files over <code>file://</code>. To run the demo
+							properly, start a local HTTP server:
+						</p>
+						<!-- <pre
+							style="font-size:16px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+python3 -m http.server 8000
+    </pre> -->
+						<pre style="font-size:16px;"><code>python3 -m http.server 8000</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:10px;">
+							Then open: <code>http://localhost:8000/code.html</code> in your browser.
+						</p>
+						<ul style="font-size:18px; color:#94a3b8; margin-top:10px; line-height:1.6;">
+							<li class="fragment">Ensures the browser can load <code>.wasm</code> via HTTP.</li>
+							<li class="fragment">Enables proper execution of JS and WASM functions.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4b: Browser Performance Overview -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Browser WASM Performance Results</h3>
+						<p style="font-size:20px; margin-bottom:20px;">WASM Execution time comparison across browsers:
+						</p>
+						<ul style="font-size:24px; margin-top:20px; line-height:2.2;">
+							<li class="fragment">🏅 <strong>Safari</strong> ~75ms (fastest WASM)</li>
+							<li class="fragment">🥈 <strong>Firefox:</strong> ~147ms (slightly slower WASM)</li>
+							<li class="fragment">🥉 <strong>Chrome:</strong> ~156ms (slowest WASM)</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4b: Browser Performance Overview -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Browser JS Performance Results</h3>
+						<p style="font-size:20px; margin-bottom:20px;">JS Execution time comparison across browsers:
+						</p>
+						<ul style="font-size:24px; margin-top:20px; line-height:2.2;">
+							<li class="fragment">🏅 <strong>Firefox:</strong> ~59ms (fastest JS)</li>
+							<li class="fragment">🥈 <strong>Chrome:</strong> ~82ms (slightly slower JS)</li>
+							<li class="fragment">🥉 <strong>Safari:</strong> ~228ms (slowest JS)</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4c: Safari Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#ec4899;">Safari Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~75ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Safari's JavaScriptCore has different JIT compilation characteristics affecting WASM speed.
+						</p> -->
+						<img src="safari_console.jpg" alt="Safari Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+
+
+				<!-- SECTION 4b: Firefox Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f97316;">Firefox Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~147ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Firefox's SpiderMonkey engine shows consistent performance with slight overhead.
+						</p> -->
+						<img src="firefox_console.png" alt="Firefox Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+				<!-- SECTION 4a: Chrome Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#3b82f6;">Chrome Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~156ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Chrome's optimized V8 engine provides the fastest WASM execution.
+						</p> -->
+						<img src="chrome_console.png" alt="Chrome Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+
+
+				<!-- SECTION 5: Key Observations -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f87171;"> Key Observations</h3>
+						<ul style="font-size:21px; line-height:2; margin:0;">
+							<li class="fragment">WASM is ~3× faster than JS on Safari.</li>
+							<li class="fragment">JS is faster than WASM on Firefox and Chrome for this test.</li>
+							<li class="fragment">Browser performance for JS vs WASM is highly dependent on the JS
+								engine.</li>
+							<li class="fragment">WASM benefits simple computations in slower JS engines.</li>
+							<li class="fragment">For larger/complex computations, WASM usually outperforms JS.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 6: Conclusion -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:rgba(107, 255, 1, 0.902);;"> Conclusions</h3>
+						<ul style="font-size:21px; line-height:2; margin:0;">
+							<li class="fragment">WASM was fastest on Safari (75 ms) because Safari’s JS engine,
+								JavaScriptCore, is slower on loop-heavy numeric computations, so WASM gives a clear
+								speedup.</li>
+							<li class="fragment">On Firefox (JS 59 ms vs WASM 147 ms) and Chrome (JS 82 ms vs WASM
+								156 ms), JS was faster because SpiderMonkey (Firefox) and V8 (Chrome) have highly
+								optimized JIT engines for simple numeric loops, sometimes outperforming WASM.</li>
+							<li class="fragment">The experiment highlights that JS vs WASM performance is
+								browser-dependent, not universally in favor of WASM.</li>
+							<li class="fragment">Simple computations with small loops can show JS outperforming WASM
+								due to WASM call overhead.</li>
+							<li class="fragment">WASM shows clear advantages for large or complex computations, where
+								its near-native speed dominates JS overhead.</li>
+						</ul>
+					</div>
+				</section>
+
+			</section>
+
+
+
+
+
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+
+				<!-- SECTION 1: Project Overview -->
+				<section>
+					<div class="content-box">
+						<h2>Mini WASM Experiment 2(Optimized)</h2>
+						<h3 style="color:#38bdf8;"> Experiment Overview</h3>
+						<ul style="font-size:20px; line-height:1.8; text-align:left;">
+							<li class="fragment">Goal: Compare WASM speed across Safari, Chrome, Firefox</li>
+							<li class="fragment">Implementation: C++ function with heavy computation</li>
+							<li class="fragment">Compiled using Emscripten in optimized manner</li>
+							<li class="fragment">Generated: <code>.html, .wasm</code> and <code>.js</code> files</li>
+							<li class="fragment">Modified HTML for testing</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 2: C++ Code -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f472b6;"> C++ Code</h3>
+						<pre style="font-size:16px;"><code>extern "C" {
+
+int heavy(int n) {
+    int sum = 0;
+    for(int i = 0; i < n; i++) {
+        sum += (i % 10);
+    }
+    return sum;
+}
+
+}</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							extern "C" tells the C++ compiler not to mangle the function name, so it can be called from
+							JavaScript or C with a simple, predictable name.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 3: Compilation Command -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#22c55e;"> Compilation Command</h3>
+						<pre style="font-size:16px;"><code>emcc code1.cpp -O3 \       
+-s WASM=1 \
+-s EXPORTED_FUNCTIONS='["_heavy"]' \
+-s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' \
+-o code1.js</code></pre>
+						<ul style="font-size:20px; margin-top:20px; line-height:1.8;">
+							<li><strong>-O3:</strong> Apply maximum optimisation level</li>
+							<li><strong>-s WASM=1:</strong> Enable WASM output</li>
+							<li><strong>-s EXPORTED_FUNCTIONS:</strong> Expose C++ function <code>heavy</code> to
+								JavaScript</li>
+							<li><strong>-s EXPORTED_RUNTIME_METHODS:</strong> Expose runtime helpers like
+								<code>cwrap</code> for easy JS calls
+							</li>
+							<li><strong>-o code1.js:</strong> Generate JS + WASM files</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4: Custom HTML Modifications -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#a78bfa;"> Custom HTML Modifications</h3>
+						<!-- <p style="font-size:20px; margin-bottom:20px;">
+							Custom code blocks added to the generated HTML file for testing:
+						</p> -->
+						<p style="font-size:18px; margin-bottom:15px; color:#38bdf8;">
+							<strong>Code Block 1:</strong>
+						</p>
+						<pre style="font-size:14px;"><code>
+<textarea id="output" rows="8"></textarea>
+<div style="margin: 20px;">
+	<button onclick="runJS()">Run JS</button>
+	<button onclick="runWASM()">Run WASM</button>
+</div>
+<p id="result"></p>
+						</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							This code adds a textarea to show output, buttons to run JS or WASM functions, and a
+							paragraph to display the result.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 4a: Custom HTML Second Block -->
+				<section>
+					<div class="content-box">
+						<!-- <h3 style="color:#a78bfa;"> Custom Code Block 2</h3> -->
+						<p style="font-size:18px; margin-bottom:15px; color:#f472b6;">
+							<strong>Code Block 2:</strong>
+						</p>
+						<pre style="font-size:14px;"><code>
+let heavyWASM;
+Module.onRuntimeInitialized = function() {
+
+	heavyWASM = Module.cwrap('heavy', 'number', ['number']);
+
+	console.log("WASM Ready ✅");
+};
+function heavyJS(n) {
+	let sum = 0;
+	for(let i = 0; i < n; i++) {
+  		sum += (i % 10);
+	}
+	return sum;
+}
+
+function runJS() {
+	const N = 5e7;
+    console.time("JS Time");
+    let res = heavyJS(N);
+    console.timeEnd("JS Time");
+    document.getElementById("result").innerText = "JS Result: " + res;
+}
+
+function runWASM() {
+	const N = 5e7;
+    console.time("WASM Time");
+    let res = heavyWASM(N);
+    console.timeEnd("WASM Time");
+    document.getElementById("result").innerText = "WASM Result: " + res;
+}
+						</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:20px;">
+							This code defines a JS version and a WASM version of heavy, then runs and times each when
+							the buttons are clicked, displaying the results.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION: Running Local Server -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Running Local Server</h3>
+						<p style="font-size:18px; color:#94a3b8; margin-top:10px;">
+							Browsers block loading <code>.wasm</code> files over <code>file://</code>. To run the demo
+							properly, start a local HTTP server:
+						</p>
+						<!-- <pre
+							style="font-size:16px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+python3 -m http.server 8000
+    </pre> -->
+						<pre style="font-size:16px;"><code>python3 -m http.server 8000</code></pre>
+						<p style="font-size:18px; color:#94a3b8; margin-top:10px;">
+							Then open: <code>http://localhost:8000/code.html</code> in your browser.
+						</p>
+						<ul style="font-size:18px; color:#94a3b8; margin-top:10px; line-height:1.6;">
+							<li class="fragment">Ensures the browser can load <code>.wasm</code> via HTTP.</li>
+							<li class="fragment">Enables proper execution of JS and WASM functions.</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4b: Browser Performance Overview -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Browser WASM Performance Results</h3>
+						<p style="font-size:20px; margin-bottom:20px;">WASM Execution time comparison across browsers:
+						</p>
+						<ul style="font-size:24px; margin-top:20px; line-height:2.2;">
+							<li class="fragment">🏅 <strong>Safari</strong> ~47ms (fastest WASM)</li>
+							<li class="fragment">🥈 <strong>Chrome:</strong> ~66ms (slightly slower WASM)</li>
+							<li class="fragment">🥉 <strong>Firefox:</strong> ~71ms (slowest WASM)</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4b: Browser Performance Overview -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#facc15;"> Browser JS Performance Results</h3>
+						<p style="font-size:20px; margin-bottom:20px;">JS Execution time comparison across browsers:
+						</p>
+						<ul style="font-size:24px; margin-top:20px; line-height:2.2;">
+							<li class="fragment">🏅 <strong>Firefox:</strong> ~71ms (fastest JS)</li>
+							<li class="fragment">🥈 <strong>Chrome:</strong> ~82ms (slightly slower JS)</li>
+							<li class="fragment">🥉 <strong>Safari:</strong> ~260ms (slowest JS)</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 4c: Safari Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#ec4899;">Safari Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~75ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Safari's JavaScriptCore has different JIT compilation characteristics affecting WASM speed.
+						</p> -->
+						<img src="safari_console1.png" alt="Safari Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+
+
+				<!-- SECTION 4b: Firefox Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f97316;">Firefox Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~147ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Firefox's SpiderMonkey engine shows consistent performance with slight overhead.
+						</p> -->
+						<img src="firefox_console1.png" alt="Firefox Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+				<!-- SECTION 4a: Chrome Results -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#3b82f6;">Chrome Results</h3>
+						<p style="font-size:22px; margin-bottom:20px;">
+							<strong>WASM Execution Time: ~156ms</strong>
+						</p>
+						<!-- <p style="font-size:18px; color:#94a3b8; margin-bottom:20px;">
+							Chrome's optimized V8 engine provides the fastest WASM execution.
+						</p> -->
+						<img src="chrome_console1.png" alt="Chrome Console"
+							style="max-width:70%; height:auto; border-radius:12px; box-shadow:0 0 20px rgba(59,130,246,0.4);">
+					</div>
+				</section>
+
+
+
+				<!-- SECTION 5: Key Observations -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:#f87171;"> Key Observations</h3>
+						<ul style="font-size:21px; line-height:2; margin:0;">
+							<li class="fragment">WASM becomes significantly faster on Safari.</li>
+							<li class="fragment">On Chrome, WASM slightly outperforms JS.</li>
+							<li class="fragment">On Firefox, JS and WASM perform almost equally.</li>
+							<li class="fragment">Optimization greatly improves WASM performance across all browsers.
+							</li>
+							<li class="fragment">The performance gap between JS and WASM reverses after optimization.
+							</li>
+						</ul>
+					</div>
+				</section>
+
+				<!-- SECTION 6: Conclusion -->
+				<section>
+					<div class="content-box">
+						<h3 style="color:rgba(107, 255, 1, 0.902);;"> Conclusions</h3>
+						<ul style="font-size:21px; line-height:2; margin:0;">
+							<li class="fragment">With optimization, WASM shows clear performance gains, especially on
+								Safari, where compiled code benefits more than JS.</li>
+							<li class="fragment">On Chrome and Firefox, highly optimized JIT engines (V8 and
+								SpiderMonkey) remain competitive, but WASM matches or exceeds JS performance.</li>
+							<li class="fragment">Optimization removes much of the initial overhead disadvantage of
+								WASM, making it more efficient.</li>
+							<li class="fragment">The experiment confirms that WASM reaches near-native performance
+								when optimized, while JS depends heavily on runtime JIT optimizations.</li>
+							<li class="fragment">Overall, with optimization, WASM becomes more reliable and
+								competitive across browsers, especially for performance critical tasks.</li>
+						</ul>
+					</div>
+				</section>
+
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 1 - Key Takeaways -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:44px; margin-bottom:25px;">
+						Key Takeaways
+					</h2>
+
+					<div style="display:flex; flex-direction:column; gap:18px;">
+						<!-- Card 1: What We Covered -->
+						<div class="fragment fade-up"
+							style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#38bdf8; font-size:24px; margin-top:0; margin-bottom:10px;">What We
+								Covered</h3>
+							<ul
+								style="font-size:18px; margin:8px 0; line-height:1.6; text-align:left; padding-left:20px;">
+								<li>WebAssembly fundamentals & motivation</li>
+								<li>How WASM integrates with the web</li>
+								<li>JS vs WASM performance comparison</li>
+								<li>Emscripten compilation workflow</li>
+								<li>Browser execution differences</li>
+							</ul>
+						</div>
+
+						<!-- Card 2: Core Insights -->
+						<div class="fragment fade-up"
+							style="background:rgba(244,114,182,0.1); border:1px solid rgba(244,114,182,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#f472b6; font-size:24px; margin-top:0; margin-bottom:10px;">Core
+								Insights</h3>
+							<ul
+								style="font-size:18px; margin:8px 0; line-height:1.6; text-align:left; padding-left:20px;">
+								<li>Near-native performance in browsers</li>
+								<li>Works across all major browsers</li>
+								<li>Supports multiple languages (C/C++/Rust)</li>
+								<li>Secure sandboxed execution</li>
+								<li>Practical & accessible tooling</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 2 - Advantages -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:48px; margin-bottom:40px;">
+						Why Use WebAssembly?
+					</h2>
+
+					<div style="display:grid; grid-template-columns:1fr 1fr; gap:25px;">
+						<!-- Performance -->
+						<div class="fragment fade-up"
+							style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#22c55e; font-size:22px; margin-top:0;">⚡ Performance</h3>
+							<p style="font-size:18px; line-height:1.6;">Near-native execution speed for compute-heavy
+								tasks like gaming, simulations, and real-time processing.</p>
+						</div>
+
+						<!-- Security -->
+						<div class="fragment fade-up"
+							style="background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#f87171; font-size:22px; margin-top:0;">🔒 Security</h3>
+							<p style="font-size:18px; line-height:1.6;">Runs in a sandboxed environment with memory-safe
+								execution model and controlled access.</p>
+						</div>
+
+						<!-- Portability -->
+						<div class="fragment fade-up"
+							style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#38bdf8; font-size:22px; margin-top:0;">🌍 Portability</h3>
+							<p style="font-size:18px; line-height:1.6;">Works across Chrome, Firefox, Safari. Same
+								binary runs everywhere without recompilation.</p>
+						</div>
+
+						<!-- Language Flexibility -->
+						<div class="fragment fade-up"
+							style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); border-radius:16px; padding:20px;">
+							<h3 style="color:#a78bfa; font-size:22px; margin-top:0;">🧠 Language Flexibility</h3>
+							<p style="font-size:18px; line-height:1.6;">Write in C, C++, or Rust. Compile once and run
+								on the web.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 3 - Limitations -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:48px; margin-bottom:40px; text-align:center;">
+						Challenges of WebAssembly
+					</h2>
+
+					<div
+						style="display:flex; flex-direction:column; gap:18px; max-width:850px; margin:0 auto; width:100%;">
+						<!-- Challenge 1 -->
+						<div class="fragment fade-up"
+							style="display:flex; align-items:center; gap:15px; padding:18px; text-align:left;">
+							<span style="font-size:28px; flex-shrink:0;">🔗</span>
+							<div style="flex:1;">
+								<h3 style="color:#f472b6; font-size:20px; margin:0 0 6px 0;">No Direct DOM Access</h3>
+								<p style="font-size:16px; margin:0; color:#94a3b8;">Requires JavaScript as a bridge
+									between WASM and browser APIs.</p>
+							</div>
+						</div>
+
+						<!-- Challenge 2 -->
+						<div class="fragment fade-up"
+							style="display:flex; align-items:center; gap:15px; padding:18px; text-align:left;">
+							<span style="font-size:28px; flex-shrink:0;">⏳</span>
+							<div style="flex:1;">
+								<h3 style="color:#facc15; font-size:20px; margin:0 0 6px 0;">Startup Overhead</h3>
+								<p style="font-size:16px; margin:0; color:#94a3b8;">Load time + compilation can add
+									latency, especially for large modules.</p>
+							</div>
+						</div>
+
+						<!-- Challenge 3 -->
+						<div class="fragment fade-up"
+							style="display:flex; align-items:center; gap:15px; padding:18px; text-align:left;">
+							<span style="font-size:28px; flex-shrink:0;">🔄</span>
+							<div style="flex:1;">
+								<h3 style="color:#38bdf8; font-size:20px; margin:0 0 6px 0;">JS ↔ WASM Call Cost</h3>
+								<p style="font-size:16px; margin:0; color:#94a3b8;">Frequent function calls reduce
+									performance gains due to crossing boundaries.</p>
+							</div>
+						</div>
+
+						<!-- Challenge 4 -->
+						<div class="fragment fade-up"
+							style="display:flex; align-items:center; gap:15px; padding:18px; text-align:left;">
+							<span style="font-size:28px; flex-shrink:0;">⚠️</span>
+							<div style="flex:1;">
+								<h3 style="color:#f87171; font-size:20px; margin:0 0 6px 0;">Evolving Ecosystem</h3>
+								<p style="font-size:16px; margin:0; color:#94a3b8;">Advanced features not fully
+									standardized; tooling still maturing.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 4 - Real-World Use Cases -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:48px; margin-bottom:40px;">
+						Where WASM is Used
+					</h2>
+
+					<div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+						<!-- Gaming -->
+						<div class="fragment fade-up"
+							style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#38bdf8;">🎮 Game Engines</strong>
+							</p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">Unity, Unreal, and custom engines
+								running in browsers.</p>
+						</div>
+
+						<!-- Media Processing -->
+						<div class="fragment fade-up"
+							style="background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#a78bfa;">🖼️ Media
+									Processing</strong></p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">Video editing, image filters,
+								real-time effects.</p>
+						</div>
+
+						<!-- Scientific -->
+						<div class="fragment fade-up"
+							style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#22c55e;">🔬 Scientific
+									Computing</strong></p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">Simulations, numerical analysis,
+								data visualization.</p>
+						</div>
+
+						<!-- Specialized Software -->
+						<div class="fragment fade-up"
+							style="background:rgba(248,150,49,0.08); border:1px solid rgba(248,150,49,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#f97316;">🎵 Specialized
+									Software</strong></p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">CAD tools, music production, design
+								software.</p>
+						</div>
+
+						<!-- Security & Blockchain -->
+						<div class="fragment fade-up"
+							style="background:rgba(236,72,153,0.08); border:1px solid rgba(236,72,153,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#ec4899;">🔐 Security &
+									Blockchain</strong></p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">Cryptographic computations, smart
+								contracts.</p>
+						</div>
+
+						<!-- Web Apps -->
+						<div class="fragment fade-up"
+							style="background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.25); border-radius:14px; padding:22px; text-align:left;">
+							<p style="font-size:20px; margin:0;"><strong style="color:#00f5ff;">💻 Web Apps</strong></p>
+							<p style="font-size:16px; margin:10px 0; color:#94a3b8;">Figma, Photoshop, Google Sheets
+								(complex calculations).</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 5 - Future of WASM -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:48px; margin-bottom:40px;">
+						The Future of WebAssembly
+					</h2>
+
+					<div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+						<!-- WASI -->
+						<div class="fragment fade-up"
+							style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#38bdf8; font-size:22px; margin-top:0;">WASI (System Interface)</h3>
+							<p style="font-size:18px; line-height:1.6;">Run WASM outside browsers with standardized
+								system interface.</p>
+						</div>
+
+						<!-- Beyond Web -->
+						<div class="fragment fade-up"
+							style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#a78bfa; font-size:22px; margin-top:0;">Beyond the Web</h3>
+							<p style="font-size:18px; line-height:1.6;">Node.js, serverless computing, edge computing
+								platforms.</p>
+						</div>
+
+						<!-- Multithreading -->
+						<div class="fragment fade-up"
+							style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#22c55e; font-size:22px; margin-top:0;">Multithreading</h3>
+							<p style="font-size:18px; line-height:1.6;">Shared memory + parallel execution for true
+								concurrent computation.</p>
+						</div>
+
+						<!-- Garbage Collection -->
+						<div class="fragment fade-up"
+							style="background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#f87171; font-size:22px; margin-top:0;">Wider Language Support</h3>
+							<p style="font-size:18px; line-height:1.6;">Better support for high-level languages like
+								Python, Java.</p>
+						</div>
+
+						<!-- Component Model -->
+						<div class="fragment fade-up"
+							style="background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#facc15; font-size:22px; margin-top:0;">Component Model</h3>
+							<p style="font-size:18px; line-height:1.6;">Modular, reusable WASM components with
+								standardized interfaces.</p>
+						</div>
+
+						<!-- Direct DOM Access -->
+						<div class="fragment fade-up"
+							style="background:rgba(236,72,153,0.1); border:1px solid rgba(236,72,153,0.3); border-radius:14px; padding:22px;">
+							<h3 style="color:#ec4899; font-size:22px; margin-top:0;">DOM Integration</h3>
+							<p style="font-size:18px; line-height:1.6;">Direct DOM manipulation without JavaScript
+								bridge overhead.</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 6 - Final Thoughts -->
+			<section data-background-gradient="linear-gradient(135deg, #020617, #0f172a)">
+				<div class="content-box">
+					<h2 style="font-size:40px; margin-bottom:25px; text-align:center;">
+						Final Thoughts
+					</h2>
+
+					<div
+						style="display:flex; flex-direction:column; gap:20px; max-width:900px; margin:auto; max-height:calc(100vh - 200px); overflow-y:auto;">
+						<!-- Why It Matters -->
+						<div class="fragment fade-up">
+							<h3 style="color:#38bdf8; font-size:24px; margin-bottom:10px; margin-top:0;">Why It
+								Matters</h3>
+							<p style="font-size:17px; line-height:1.6; color:#e2e8f0; margin:0;">
+								WebAssembly brings system-level performance to the web browser, enabling
+								high-performance gaming, scientific computing, and media processing directly in
+								browsers.
+							</p>
+						</div>
+
+						<!-- Start Exploring -->
+						<div class="fragment fade-up">
+							<h3 style="color:#f472b6; font-size:24px; margin-bottom:10px; margin-top:0;">Start
+								Exploring Today</h3>
+							<ul style="font-size:16px; line-height:1.7; margin:0; padding-left:25px;">
+								<li>Try compiling your first C/C++ program to WASM</li>
+								<li>Build a performance comparison demo</li>
+								<li>Integrate WASM into an existing web project</li>
+								<li>Experiment with real-world optimizations</li>
+							</ul>
+						</div>
+
+						<!-- Resources -->
+						<div class="fragment fade-up">
+							<h3 style="color:#22c55e; font-size:24px; margin-bottom:10px; margin-top:0;">Resources
+							</h3>
+							<ul style="font-size:15px; line-height:1.7; margin:0; padding-left:25px; color:#94a3b8;">
+								<li><strong style="color:#fff;">webassembly.org</strong> – Official WASM
+									specification</li>
+								<li><strong style="color:#fff;">MDN Web Docs</strong> – WebAssembly documentation
+								</li>
+								<li><strong style="color:#fff;">Emscripten Docs</strong> – Compilation tutorials</li>
+								<li><strong style="color:#fff;">WebAssembly Community</strong> – Forums & discussions
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- CONCLUSION SECTION: Slide 7 - Thank You -->
+			<section data-background-gradient="linear-gradient(135deg, #0f172a, #020617)">
+				<div
+					style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; gap:40px;">
+					<h1
+						style="font-size:80px; color:#00f5ff; text-shadow:0 0 30px rgba(0,245,255,0.5); letter-spacing:2px;">
+						Thank You! 🙌
+					</h1>
+
+					<div class="fragment fade-up" style="font-size:32px; color:#94a3b8;">
+						💬 Questions?
+					</div>
+
+					<div class="fragment fade-up"
+						style="font-size:28px; color:#38bdf8; max-width:800px; text-align:center;">
+						✨ Open for Discussion & Feedback ✨
+					</div>
+
+					<div class="fragment fade-up" style="margin-top:40px;">
+						<p style="margin:5px 0; font-size:28px; font-weight:700; color:#00f5ff; letter-spacing:1px; text-shadow: 0 0 20px rgba(0,245,255,0.4);">Somsubhra Mukherjee</p>
+						<p style="margin:8px 0 0 0; font-size:24px; color:#38bdf8; font-weight:600; letter-spacing:2px; text-shadow: 0 0 15px rgba(56,189,248,0.3);">25MF10063</p>
+					</div>
+				</div>
+			</section>
+
 		</div>
 
 		<script src="dist/reveal.js"></script>
@@ -39,5 +1847,6 @@
 				plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
 			});
 		</script>
-	</body>
+</body>
+
 </html>
